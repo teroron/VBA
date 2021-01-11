@@ -1,0 +1,95 @@
+Sub readPath()
+    Dim arry As Variant
+    Dim t As Integer
+    Range("A5:C1000").ClearContents
+    arry = Array("cva", "cds")
+    For Each subDir In arry
+        Call readAllFile(subDir, t)
+    Next subDir
+End Sub
+
+
+    Function readAllFile(subDir As Variant, t As Integer)
+    Dim myFzSO As New FileSystemObject
+    Dim myFolder As Folder
+    Dim myFiles As Files
+    Dim myFile As File
+    Dim inputPath As String
+    inputPath = Range("A2").Value
+    Dim i As Integer
+    Set myFolder = myFzSO.GetFolder(inputPath & subDir)
+    Set myFiles = myFolder.Files
+    
+        If t = 0 Then
+                i = 5
+            Else
+                i = t
+        End If
+        
+        For Each myFile In myFiles
+            If myFile.Name Like "*NPV.txt" Then
+                    Cells(i, 1).Value = myFile.path
+                    Cells(i, 2).Value = subDir
+                    Cells(i, 3).Value = myFile.Name
+                    i = i + 1
+                Else
+            End If
+        Next
+                t = i
+    End Function
+    
+    
+    
+ Sub makeCSV(sheetName As String)
+    Dim myFileNo As Integer
+    Dim myLastRow As Long
+    Dim i As Long
+    Dim outputPath As String
+    Worksheets(sheetName).Activate
+    myLastRow = Cells(Rows.Count, 1).End(xlUp).Row
+    myFileNo = FreeFile
+    outputPath = Range("H2").Value
+    Open outputPath For Output As #myFileNo
+    For i = 5 To myLastRow
+        Write #myFileNo, Cells(i, 1).Value, _
+            Cells(i, 2).Value, Cells(i, 3).Value
+    Next i
+    Close #myFileNo
+End Sub
+
+Sub makeNPVCSV()
+    Call makeCSV("NPV")
+End Sub
+    
+
+
+
+Sub fileCopy()
+    Dim myFSO As New FileSystemObject
+    Dim myFolder As Folder
+    Dim myFiles As Files
+    Dim myFile As File
+    Dim i As Integer
+    Range("A5:C1000").ClearContents
+    Set myFolder = myFSO.GetFolder("C:\Users\a_nuc\Desktop\実験\仕事\data")
+    Set myFiles = myFolder.Files
+    i = 5
+    For Each myFile In myFiles
+        Cells(i, 1).Value = myFile.DateLastModified
+        Cells(i, 2).Value = myFile.path
+        Cells(i, 3).Value = myFile.Name
+        myFSO.CopyFile Source:=myFile.path, _
+            Destination:="C:\Users\a_nuc\Desktop\実験\仕事\data\コピー先\" & myFile.Name, overwritefiles:=True
+        i = i + 1
+    Next
+End Sub
+
+
+Sub makeCFCSV()
+    Call makeCSV("CF")
+End Sub
+
+
+
+
+
